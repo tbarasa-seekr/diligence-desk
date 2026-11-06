@@ -1,0 +1,10 @@
+{
+  "file_search_tool_id": "tool-2c201af4-2565-4a8e-a577-5bb37af1af95",
+  "vector_store_id": "01849134-e8c4-47df-92e0-5e28ec31125a",
+  "agent_id": "agent-f63a77fa-6870-4c60-8c7a-0eddfba34d41",
+  "model": "openai/gpt-oss-120b",
+  "with_facts": false,
+  "top_k": 5,
+  "score_threshold": 0.3,
+  "status": "agentstatus.active"
+}
