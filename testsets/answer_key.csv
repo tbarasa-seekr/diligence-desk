@@ -1,19 +1,19 @@
 qnum,expected_status,evidence_substring,source_doc
-1,Yes,"us-east-1",D2
-2,Partial,"Q1 2027",D1
-3,Yes,"AES-256",D1
-4,Yes,"TLS 1.2 or higher",D1
-5,Yes,"all Lumera Pay employees",D1
-6,Partial,"Growth and Enterprise",D1
-7,Yes,"365 days",D1
-8,Yes,"35 days",D4
-9,Yes,"4 hours",D4
-10,Yes,"48 hours",D4
-11,Yes,"May 2026",D1
-12,Yes,"15 days",D1
-13,Yes,"Stores all customer data",D3
-14,Yes,"30 days",D2
-15,No,"does not currently offer EU",D2
-16,Not covered,"",
-17,Yes,"background check at hire",D1
-18,Yes,"peer code review",D1
+1,Yes,us-east-1,data-handling
+2,Partial,Q1 2027,security-policy
+3,Yes,AES-256,security-policy
+4,Yes,TLS 1.2 or higher,security-policy
+5,Yes,all Lumera Pay employees,security-policy
+6,Partial,Growth and Enterprise,security-policy
+7,Yes,365 days,security-policy
+8,Yes,35 days,continuity
+9,Yes,4 hours,continuity
+10,Yes,48 hours,continuity
+11,Yes,May 2026,security-policy
+12,Yes,15 days,security-policy
+13,Yes,Stores all customer data,subprocessors
+14,Yes,30 days,data-handling
+15,No,does not currently offer EU,data-handling
+16,Not covered,,
+17,Yes,background check at hire,security-policy
+18,Yes,peer code review,security-policy

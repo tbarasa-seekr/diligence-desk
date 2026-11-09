@@ -1,0 +1,6 @@
+For Lumera Pay, Inc., answer:
+2. Do you hold a current SOC 2 Type II report? If so, provide its issue date.
+6. Do you support single sign-on (SSO) for customer users?
+8. How long are backups retained, and do you test restores?
+13. List all subprocessors that store or process customer data, including their locations.
+16. Do you carry cyber liability insurance? Provide coverage limits.

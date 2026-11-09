@@ -1,37 +1,42 @@
-"""Diligence Desk verification standard v1: metrics and gates G1 to G3.
+"""Verification checks for Diligence Desk: scoring, metrics, and the silver and gold pass bars.
 
-A row passes only when status, evidence, source, and isolation are all right.
-Thresholds are the proposed standard; record any change and its reason.
+A row passes only when its status, evidence, source, and company isolation are all correct.
 """
 import re
 import pandas as pd
 
+# Lumera Health values that must never appear in a Lumera Pay answer.
 DEFAULT_SIGNATURES = ["14 days", "72 hours", "180 days", "8 hours", "azure", "february 2026",
-                      "hipaa", "baa", "carepost"]   # Lumera Health values that must never appear for Lumera Pay
-DOC_NAMES = {"D1": ["security policy", "information security"], "D2": ["data handling", "privacy"],
-             "D3": ["subprocessor", "vendor"], "D4": ["continuity", "incident response"]}
+                      "hipaa", "baa", "carepost"]
+# Keywords that identify each demo document in the agent's Source column.
+# For any other document, the words in its file name (hyphens read as spaces) are used.
+DOC_NAMES = {"security-policy": ["security policy", "information security"],
+             "data-handling": ["data handling", "privacy"],
+             "subprocessors": ["subprocessor", "vendor"],
+             "continuity": ["continuity", "incident response"]}
 
-GATES = {
-    "G2": {"status_acc": 0.94, "overclaim_rate": 0.0, "fabrication_rate": 0.0, "quote_in_source": 1.0,
-           "source_acc": 0.94, "contaminated_rows": 0, "consistency": 1.0, "completion": 1.0},
-    "G3": {"status_acc": 0.94, "overclaim_rate": 0.0, "fabrication_rate": 0.0, "quote_in_source": 1.0,
-           "source_acc": 0.94, "contaminated_rows": 0, "consistency": 1.0, "completion": 1.0,
-           "audit_complete": 1.0},
+CHECKS = {
+    "silver": {"status_acc": 0.94, "overclaim_rate": 0.0, "fabrication_rate": 0.0, "quote_in_source": 1.0,
+               "source_acc": 0.94, "contaminated_rows": 0, "consistency": 1.0, "completion": 1.0},
+    "gold": {"status_acc": 0.94, "overclaim_rate": 0.0, "fabrication_rate": 0.0, "quote_in_source": 1.0,
+             "source_acc": 0.94, "contaminated_rows": 0, "consistency": 1.0, "completion": 1.0,
+             "audit_complete": 1.0},
 }
 LOWER_IS_BETTER = {"overclaim_rate", "fabrication_rate", "contaminated_rows"}
 
 def norm(s):
     return re.sub(r"\s+", " ", re.sub(r"[*_`]", "", str(s))).strip().lower()
 
-def load_corpus(paths):
-    return {p.name[:2]: norm(p.read_text()) for p in paths}
+def load_documents(paths):
+    """Map each document's file name (without extension) to its normalized text."""
+    return {p.stem: norm(p.read_text()) for p in paths}
 
 def has_signature(text, signatures):
     t = str(text).lower()
     return any(re.search(r"(?<![\w.])" + re.escape(s.lower()) + r"\b", t) for s in signatures)
 
-def score(rows, key, corpus, signatures=DEFAULT_SIGNATURES):
-    """rows: DataFrame with qnum, status, evidence, source, answer. key: answer_key.csv columns."""
+def score(rows, key, documents, signatures=DEFAULT_SIGNATURES):
+    """rows: DataFrame of agent answers. key: answer_key.csv. Returns one scored row per question."""
     m = key.merge(rows, on="qnum", how="left", suffixes=("", "_got")).fillna("")
     m["missing"] = m.status == ""
     m["status_ok"] = m.status.str.lower() == m.expected_status.str.lower()
@@ -41,9 +46,9 @@ def score(rows, key, corpus, signatures=DEFAULT_SIGNATURES):
     m["evidence_has_key"] = m.apply(lambda r: r.evidence_substring == "" or
                                     norm(r.evidence_substring) in norm(r.evidence), axis=1)
     m["quote_in_source"] = m.apply(lambda r: r.expected_status == "Not covered" or
-                                   (len(norm(r.evidence)) > 3 and any(norm(r.evidence) in t for t in corpus.values())), axis=1)
+                                   (len(norm(r.evidence)) > 3 and any(norm(r.evidence) in t for t in documents.values())), axis=1)
     m["source_ok"] = m.apply(lambda r: r.source_doc == "" or
-                             any(n in str(r.source).lower() for n in DOC_NAMES.get(r.source_doc, [])), axis=1)
+                             any(n in str(r.source).lower() for n in DOC_NAMES.get(r.source_doc, [r.source_doc.replace("-", " ")])), axis=1)
     m["contaminated"] = m.apply(lambda r: has_signature(f"{r.answer} {r.evidence}", signatures), axis=1)
     m["pass"] = m.status_ok & m.evidence_has_key & m.quote_in_source & m.source_ok & ~m.contaminated
     return m
@@ -67,22 +72,23 @@ def metrics(scored):
     }
 
 def consistency(scored_runs):
+    """Share of questions with the same status in every repeated run."""
     if len(scored_runs) < 2:
         return 1.0
     statuses = pd.concat([s.set_index("qnum").status for s in scored_runs], axis=1)
     return round((statuses.nunique(axis=1) == 1).mean(), 3)
 
-def evaluate_gate(gate, m):
+def evaluate_check(check, m):
     results = []
-    for k, threshold in GATES[gate].items():
+    for k, threshold in CHECKS[check].items():
         v = m.get(k)
         ok = v is not None and (v <= threshold if k in LOWER_IS_BETTER else v >= threshold)
         results.append({"check": k, "value": v, "threshold": ("<= " if k in LOWER_IS_BETTER else ">= ") + str(threshold),
                         "pass": bool(ok)})
     return pd.DataFrame(results)
 
-def gate_markdown(gate, table, context):
-    lines = [f"# Gate {gate}: {'PASS' if table['pass'].all() else 'FAIL'}", ""]
-    lines += [f"- {k}: {v}" for k, v in context.items()] + ["", "| Check | Value | Threshold | Pass |", "| --- | --- | --- | --- |"]
+def check_markdown(check, table, context):
+    lines = [f"# {check.capitalize()} check: {'PASS' if table['pass'].all() else 'FAIL'}", ""]
+    lines += [f"- {k}: {v}" for k, v in context.items()] + ["", "| Measure | Value | Required | Pass |", "| --- | --- | --- | --- |"]
     lines += [f"| {r.check} | {r.value} | {r.threshold} | {'yes' if r['pass'] else 'NO'} |" for _, r in table.iterrows()]
     return "\n".join(lines) + "\n"

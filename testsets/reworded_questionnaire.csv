@@ -1,0 +1,19 @@
+qnum,question
+1,Where is your platform hosted and in which regions does customer data reside?
+2,Can you share a SOC 2 Type II report that is currently valid? What date was it issued?
+3,What encryption standard protects customer data while it is stored?
+4,What is the lowest TLS version you accept for data moving over the network?
+5,Do all of your staff have to use MFA?
+6,Can our users sign in through our own identity provider using SSO?
+7,What is the retention period for your security logs?
+8,For how long do you keep backups and how often are restores tested?
+9,State your RTO and RPO.
+10,How quickly would you tell us about a security incident involving our data?
+11,When was your last penetration test and what did it find?
+12,How often do you scan for vulnerabilities and how fast are critical issues fixed?
+13,Which third parties store or process our data and where are they located?
+14,What happens to our data after the contract ends?
+15,Can our data be kept within the EU?
+16,What are the limits on your cyber insurance policy?
+17,Do you run background checks and security training for employees?
+18,How do you control changes to production?

@@ -1,0 +1,15 @@
+## Purpose
+Searches a library of fictional customer-shareable trust documents (security policies, data-handling standards, subprocessor lists, business continuity summaries). Every section of every document begins with a company line, for example "Company: Lumera Pay, Inc. | Information Security Policy | Section 3 of 6". Use this tool to retrieve passages for ONE named company on ONE topic.
+
+## Input
+- query (string, required): the company's full name plus the question's topic keywords.
+  - Examples: "Lumera Pay, Inc. encryption at rest in transit", "Lumera Pay, Inc. backup retention restore testing", "Lumera Pay, Inc. subprocessors customer data locations".
+
+## Behavior
+1. Run a semantic search of the library using the query.
+2. Return the matching passages verbatim, including their company line and section heading.
+
+## Limits
+- Retrieval only. This tool does not answer questions, judge adequacy or draft responses.
+- The library may contain several companies, some with similar names and near-identical policy wording. Results may include passages from other companies. The agent must keep only passages whose company line names the requested company exactly.
+- If no passage names the requested company, treat the result as no match.

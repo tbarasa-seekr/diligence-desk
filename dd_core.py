@@ -1,6 +1,6 @@
-"""Diligence Desk shared core: agent runs, output parsing, prompt building.
+"""Shared helpers: run the agent, parse its answer table, build prompts.
 
-SDK shapes verified against docs.seekr.com on Oct 25, 2026 ("Run an agent"):
+Uses these documented SeekrFlow SDK calls:
 client.agents.threads.create(), threads.create_message(thread_id, role, content),
 client.agents.runs.run(agent_id, thread_id, stream=False) -> .run_id,
 client.agents.runs.retrieve(run_id, thread_id=...) -> .status,
@@ -33,7 +33,7 @@ def message_text(content):
     return str(getattr(content, "text", content))
 
 def ask_agent(client, agent_id, prompt, timeout_s=240, poll_s=1.5):
-    """One thread per call so runs never share context. Returns text plus run metadata."""
+    """One new thread per call, so runs never share context. Returns the reply text and run details."""
     t0 = time.time()
     thread = client.agents.threads.create()
     client.agents.threads.create_message(thread_id=thread.id, role="user", content=prompt)
@@ -53,7 +53,7 @@ def ask_agent(client, agent_id, prompt, timeout_s=240, poll_s=1.5):
             "latency_s": round(time.time() - t0, 2)}
 
 def build_prompt(company, items):
-    """items: list of (qnum, question). Same input format as the bronze agent."""
+    """items: list of (question number, question text). Same format a person pastes into the Playground."""
     return f"For {company}, answer:\n" + "\n".join(f"{q}. {text}" for q, text in items)
 
 def normalize_status(s):
@@ -62,7 +62,7 @@ def normalize_status(s):
 
 _ROW = re.compile(r"^\s*\|(.+)\|\s*$")
 def parse_table(text):
-    """Parse the agent's six-column markdown table into row dicts."""
+    """Parse the agent's six-column markdown table into row dictionaries."""
     rows = []
     for line in text.splitlines():
         m = _ROW.match(line)
@@ -84,7 +84,7 @@ def needs_human(text):
     return m.group(1).strip() if m else None
 
 def chunk_ids(text):
-    """Source-tracing chunk IDs appended to assistant messages when File Search runs."""
+    """Source-trace chunk IDs that File Search appends to assistant messages."""
     return sorted(set(re.findall(r"chunk_id['\"]?\s*[:=]\s*['\"]?([A-Za-z0-9_\-]{6,})", text)))
 
 def classify_reply(text):

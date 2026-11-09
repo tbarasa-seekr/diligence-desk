@@ -1,8 +1,8 @@
-"""Offline stand-in for the seekrai SDK. Answers from the answer key so the pipeline can be proven end to end."""
+"""Offline stand-in for the seekrai SDK. It answers from the answer key so the scripts can be tested on your own machine."""
 import csv, itertools, os, re, types
 _KEY = {int(r["qnum"]): r for r in csv.DictReader(open(os.environ.get("MOCK_KEY", "testsets/answer_key.csv")))}
-_SRC = {"D1": "Information Security Policy §2", "D2": "Data Handling Standard §2", "D3": "Subprocessor List §1",
-        "D4": "Business Continuity §2", "": "\u2014"}
+_SRC = {"security-policy": "Information Security Policy §2", "data-handling": "Data Handling Standard §2",
+        "subprocessors": "Subprocessor List §1", "continuity": "Business Continuity §2", "": "\u2014"}
 _ids = itertools.count(1); _threads = {}
 def _reply(prompt):
     if "Fernwell" in prompt or ("Lumera Health" in prompt and prompt.startswith("For Lumera Health")):

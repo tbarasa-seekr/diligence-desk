@@ -1,0 +1,4 @@
+For Lumera Pay, Inc., answer:
+8. How long are backups retained?
+7. How long are security logs retained?
+14. What is your deletion policy after termination?

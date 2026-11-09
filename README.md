@@ -1,25 +1,46 @@
-# Diligence Desk SDK package v1.3 (silver and gold)
+# Diligence Desk
 
-Shapes verified against docs.seekr.com on Oct 25, 2026: File Search tool, custom functions with RunPython, agent creation,
-threads, messages, and runs. Offline suite passes (`bash tests/run_offline.sh`); no run against SeekrFlow yet.
+Diligence Desk is a SeekrFlow™ agent that drafts cited answers to a buyer's security questionnaire from one company's own trust documents. Each answer has a status (Yes, Partial, No, or Not covered), a quoted evidence phrase, and a source. When the documents are silent, the agent routes the question to a person instead of guessing.
 
-## Run order
-1. `pip install --upgrade seekrai pandas openpyxl` and `export SEEKR_API_KEY=...`
-2. Gate G0, data readiness: `python check_corpus.py --company "Lumera Pay, Inc." --other "Lumera Health" corpus/D1_*.md corpus/D2_*.md corpus/D3_*.md corpus/D4_*.md`
-   The v1.1 demo data fails on purpose (disclaimers name Lumera Health). Record it; apply the staged patch if bronze P-1 or TC-08 fails.
-3. Copy the vector store ID from the store's page in the UI, then: `python setup_sdk_agent.py --vector-store-id <ID>`
-   Custom-tool variant: `python setup_sdk_agent.py --vector-store-id <ID> --with-facts --name Diligence_Desk_SDK_Facts --tool-name trust_corpus_search_sdk2`
-4. Silver, gate G2: open `silver_notebook_v1_3.ipynb` and run all cells.
-5. Gold, gate G3: `python run_batch.py --questions testsets/questionnaire_golden.csv --company "Lumera Pay, Inc." --ids ids.json --answer-key testsets/answer_key.csv --runs 3 --gate G3 --out out/golden`
-   Then the same with `--questions testsets/paraphrase_18.csv --runs 1 --out out/paraphrase`.
-   Real companies: add `--signatures "value1;value2"` with values unique to any other company in the Org.
-6. Adversarial before D5: `python run_adversarial.py --ids ids.json --stage pre_d5 --out out/adversarial`
-7. Add D5 to the store in the UI, wait for Ready, then `--stage post_d5`, then re-run step 5 golden with `--out out/golden_post_d5`.
+All companies and figures in the demo data are fictional. Draft responses are for human review. They are not a compliance determination.
 
-## Check during the first live run (not covered by the pages read)
-- Whether the SDK agent accepts a reasoning setting and a temperature; record the agent's defaults. Consistency is measured either way.
-- That `list_messages(thread_id)[0]` is the newest message, and how chunk_id fields appear in its content.
-- Tool names must be unique in the Org; the SDK tool name replaces `trust_corpus_search` in the instructions automatically.
-- Inference jobs (/v1/inference/jobs) are documented for batch chat completions; this runner uses agent runs instead, so retrieval and source tracing stay in the loop.
+## Start here
 
-Exit codes: run_batch.py and run_adversarial.py exit 1 when a gate fails, so they can run in CI.
+| You want to | Read |
+| --- | --- |
+| Build and verify the agent | [Build and Verify Diligence Desk](docs/SOP_Build_and_Verify.md) |
+| Train an Operator and set up a company | [Operator Enablement: Diligence Desk](docs/SOP_Operator_Enablement.md) |
+| Learn the UI build, with the deck | [Enablement 1: SeekrFlow UI](enablement/ui/README.md) |
+| Learn the SDK build | [Enablement 2: SeekrFlow SDK](enablement/sdk/README.md) |
+| Share the use case with a customer | [Use Case Brief](enablement/Diligence_Desk_Use_Case_Brief.html) |
+
+## Three levels
+
+| Level | What you do |
+| --- | --- |
+| **Bronze** | Build the agent in the SeekrFlow UI and test it by hand in the Playground |
+| **Silver** | Build the same agent with the SeekrFlow SDK and score every answer with code |
+| **Gold** | Run full questionnaire files in bulk, keep an audit record, and attack the agent on purpose |
+
+## What is in this repository
+
+| Path | What it holds |
+| --- | --- |
+| `docs/` | The two SOPs |
+| `enablement/` | The deck, the Use Case Brief, and the UI and SDK learning paths |
+| `corpus/lumera-pay/upload/` | The four demo trust documents to upload: two PDFs, one Word file, and one Markdown file |
+| `corpus/lumera-pay/` | Markdown copies of the same documents, used by the document check and the scoring |
+| `corpus/lumera-health/` | One look-alike company document (PDF in `upload/`, Markdown copy beside it), used to test isolation |
+| `agent/` | The agent instructions, the search tool instructions, and the compliance record function |
+| `prompts/` | Paste-ready prompts for every bronze test |
+| `testsets/` | The answer key and the questionnaires used by the silver and gold checks |
+| `check_documents.py` | Document check |
+| `create_agent.py` | Creates the agent with the SDK |
+| `silver_check.py`, `silver_check.ipynb` | Silver check |
+| `run_questionnaire.py` | Runs a questionnaire file in bulk and writes the reviewer spreadsheet and audit log |
+| `run_attack_tests.py` | Attack tests |
+| `dd_core.py`, `verify.py` | Shared helpers and the scoring rules |
+| `tests/` | Practice check that tests the scripts on your computer without calling SeekrFlow |
+| `evidence/` | Where screenshots and results go |
+
+Real company documents never go in this repository. Keep them in the `companies/` folder, which Git ignores.

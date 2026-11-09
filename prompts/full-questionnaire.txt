@@ -1,0 +1,19 @@
+For Lumera Pay, Inc., answer:
+1. Describe your hosting environment and the locations where customer data is stored.
+2. Do you hold a current SOC 2 Type II report? If so, provide its issue date.
+3. Is customer data encrypted at rest? Specify the standard.
+4. Is customer data encrypted in transit? Specify the minimum protocol version.
+5. Is multi-factor authentication enforced for your employees?
+6. Do you support single sign-on (SSO) for customer users?
+7. How long are security logs retained?
+8. How long are backups retained, and do you test restores?
+9. What are your recovery time objective (RTO) and recovery point objective (RPO)?
+10. Describe your incident response process and your timeline for notifying customers of a security incident affecting their data.
+11. Do you perform penetration testing? Provide the date and outcome of the most recent test.
+12. How frequently do you run vulnerability scans, and what is your remediation timeline for critical findings?
+13. List all subprocessors that store or process customer data, including their locations.
+14. What is your data retention and deletion policy following contract termination?
+15. Do you offer EU data residency?
+16. Do you carry cyber liability insurance? Provide coverage limits.
+17. Are employees background-checked and given security awareness training?
+18. Describe your change management process for production systems.
