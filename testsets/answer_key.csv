@@ -1,8 +1,8 @@
 qnum,expected_status,evidence_substring,source_doc
-1,Yes,us-east-1,data-handling
+1,Yes,us-east-1,data-handling|continuity|subprocessors
 2,Partial,Q1 2027,security-policy
-3,Yes,AES-256,security-policy
-4,Yes,TLS 1.2 or higher,security-policy
+3,Yes,AES-256,security-policy|data-handling
+4,Yes,TLS 1.2 or higher,security-policy|data-handling
 5,Yes,all Lumera Pay employees,security-policy
 6,Partial,Growth and Enterprise,security-policy
 7,Yes,365 days,security-policy

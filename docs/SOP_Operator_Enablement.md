@@ -64,7 +64,7 @@ An Operator who finishes this SOP can build the agent from scratch, prove that i
 | --- | --- | --- |
 | File storage | Holds the documents you upload | Four Lumera Pay documents, plus one look-alike company |
 | Vector store | Splits documents into searchable pieces so the agent can find them by meaning | One store per company |
-| File Search tool | Lets the agent query one store, with Top K and a Score Threshold | `trust_corpus_search`, Top K 5, Score Threshold 0.3 |
+| File Search tool | Lets the agent query one store, with Top K and a Score Threshold | `trust_corpus_search`, Top K 5, Score Threshold 0.2 |
 | Agent | Instructions, a model, and tools working as one assistant | `Diligence_Desk` on `openai/gpt-oss-120b` |
 | Playground and Run Source Trace | Where you test, and where you see which passages shaped an answer | Every check in Part 2 |
 
@@ -188,7 +188,7 @@ To build in the UI instead, follow Steps 2.3 and 2.4 of the Build and Verify SOP
 1. Take 10 to 18 questions from the company's real buyer questionnaire.
 2. Save them as `companies/COMPANY/questions.csv` with the columns `qnum,question`.
 3. Save the expected answers as `companies/COMPANY/answer_key.csv` with the columns `qnum,expected_status,evidence_substring,source_doc`. Use `testsets/answer_key.csv` as the model.
-4. For each question, write the expected status (Yes, Partial, No, or Not covered), a short phrase copied word for word from the document, and the document file name without `.md`.
+4. For each question, write the expected status (Yes, Partial, No, or Not covered), a short phrase copied word for word from the document, and the document file name without `.md`. If the same fact appears in several documents, list each file name, separated by `|`.
 5. Include one question the documents cannot answer, with the expected status Not covered.
 6. Build the key from the documents, not from memory. The document owner confirms it.
 

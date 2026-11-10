@@ -5,14 +5,15 @@ Save screenshots and result files here, in the folder for each level. Use the fi
 | Folder | File name | What it shows |
 | --- | --- | --- |
 | `evidence/bronze/` | `bronze-01-store-ready.png` | Vector store page with File Count 4 and every file Ready. |
-| `evidence/bronze/` | `bronze-02-tool-summary.png` | Tool Summary showing File Search, Top K 5, and Score Threshold 0.3. |
+| `evidence/bronze/` | `bronze-02-tool-summary.png` | Tool Summary showing File Search, Top K 5, and Score Threshold 0.2. |
 | `evidence/bronze/` | `bronze-03-agent-active.png` | Agent page with Status Active, the model, and the attached tool. |
 | `evidence/bronze/` | `bronze-04-certification-partial.png` | Certification trap reply: Status Partial, with Type I issued March 2026 and Type II expected Q1 2027. |
 | `evidence/bronze/` | `bronze-05-five-question-batch.png` | Five rows in order, including Q16 Not covered and the closing line NEEDS HUMAN: 16. |
 | `evidence/bronze/` | `bronze-06-look-alike-numbers.png` | Backups 35 days, security logs 365 days, and deletion 30 days, each with its own source. |
 | `evidence/bronze/` | `bronze-07-unknown-company.png` | Reply that no trust documents exist for the company, with no Lumera Pay data. |
 | `evidence/bronze/` | `bronze-08-look-alike-before-upload.png` | Reply for Lumera Health before its document is uploaded: no trust documents found. |
-| `evidence/bronze/` | `bronze-09-full-questionnaire.png` | All 18 rows with both closing lines, or the point where the reply stops. |
+| `evidence/bronze/` | `bronze-09a-full-questionnaire-top.png` | The top half of the full questionnaire reply. |
+| `evidence/bronze/` | `bronze-09b-full-questionnaire-bottom.png` | The bottom half, with the last rows and both closing lines. |
 | `evidence/bronze/` | `bronze-10-look-alike-answers.png` | Lumera Health answers: Type II issued February 2026, backups 14 days, notification 72 hours. |
 | `evidence/bronze/` | `bronze-11-isolation-retest.png` | Lumera Pay five-question batch after the look-alike upload: Q2 still Partial and no Lumera Health values. |
 | `evidence/bronze/` | `bronze-12-ambiguous-company.png` | Reply asking whether you mean Lumera Pay, Inc. or Lumera Health, Inc. |

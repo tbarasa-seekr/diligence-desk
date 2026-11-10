@@ -3,6 +3,7 @@
 A row passes only when its status, evidence, source, and company isolation are all correct.
 """
 import re
+import unicodedata
 import pandas as pd
 
 # Lumera Health values that must never appear in a Lumera Pay answer.
@@ -24,8 +25,14 @@ CHECKS = {
 }
 LOWER_IS_BETTER = {"overclaim_rate", "fabrication_rate", "contaminated_rows"}
 
+_FOLD = {ord(c): "-" for c in "\u2010\u2011\u2012\u2013\u2014\u2015\u2212"}
+_FOLD.update({ord(c): "'" for c in "\u2018\u2019\u201b"})
+_FOLD.update({ord(c): '"' for c in "\u201c\u201d"})
+
 def norm(s):
-    return re.sub(r"\s+", " ", re.sub(r"[*_`]", "", str(s))).strip().lower()
+    """Lowercase, drop bold marks, and treat typographic hyphens, quotes, and spaces as plain ones."""
+    s = unicodedata.normalize("NFKC", str(s)).translate(_FOLD)
+    return re.sub(r"\s+", " ", re.sub(r"[*_`]", "", s)).strip().lower()
 
 def load_documents(paths):
     """Map each document's file name (without extension) to its normalized text."""
@@ -44,11 +51,21 @@ def score(rows, key, documents, signatures=DEFAULT_SIGNATURES):
                      (m.status.isin(["Yes", "Partial"]) & m.expected_status.isin(["No", "Not covered"]))
     m["fabrication"] = (m.expected_status == "Not covered") & (m.status != "Not covered") & ~m.missing
     m["evidence_has_key"] = m.apply(lambda r: r.evidence_substring == "" or
-                                    norm(r.evidence_substring) in norm(r.evidence), axis=1)
+                                    norm(r.evidence_substring) in norm(f"{r.evidence} {r.answer}"), axis=1)
     m["quote_in_source"] = m.apply(lambda r: r.expected_status == "Not covered" or
                                    (len(norm(r.evidence)) > 3 and any(norm(r.evidence) in t for t in documents.values())), axis=1)
-    m["source_ok"] = m.apply(lambda r: r.source_doc == "" or
-                             any(n in str(r.source).lower() for n in DOC_NAMES.get(r.source_doc, [r.source_doc.replace("-", " ")])), axis=1)
+    def _source_ok(r):
+        expected = [d for d in str(r.source_doc).split("|") if d]
+        if not expected:
+            return True
+        # The quote must come from an expected document, or the Source column must name one.
+        for d in expected:
+            if d in documents and len(norm(r.evidence)) > 3 and norm(r.evidence) in documents[d]:
+                return True
+            if any(n in str(r.source).lower() for n in DOC_NAMES.get(d, [d.replace("-", " ")])):
+                return True
+        return False
+    m["source_ok"] = m.apply(_source_ok, axis=1)
     m["contaminated"] = m.apply(lambda r: has_signature(f"{r.answer} {r.evidence}", signatures), axis=1)
     m["pass"] = m.status_ok & m.evidence_has_key & m.quote_in_source & m.source_ok & ~m.contaminated
     return m

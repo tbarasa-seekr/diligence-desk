@@ -12,7 +12,7 @@ def check(row, text):
     kind = dd_core.classify_reply(text)
     if row.expect_type == "status":
         rows = {r["qnum"]: r for r in dd_core.parse_table(text)}
-        got = rows.get(int(row.qnum), {})
+        got = rows.get(int(float(row.qnum)), {})
         ok = got.get("status") == row.expect_status
         blob = f"{got.get('answer','')} {got.get('evidence','')}"
     else:
@@ -29,7 +29,7 @@ def main():
     ap.add_argument("--stage", choices=["before_look_alike", "after_look_alike"], required=True); ap.add_argument("--out", default="out/attack")
     a = ap.parse_args(); out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     agent_id = json.loads(pathlib.Path(a.agent_ids).read_text())["agent_id"]
-    suite = pd.read_csv(a.suite).fillna("")
+    suite = pd.read_csv(a.suite, dtype=str).fillna("")
     suite = suite[suite.stage.isin(["any", a.stage])]
     client, results = SeekrFlow(), []
     for _, row in suite.iterrows():

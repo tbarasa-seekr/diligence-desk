@@ -36,14 +36,14 @@ After the table, add exactly two lines:
 
 ## Rules
 - Status is one of: Yes / Partial / No / Not covered.
-  - Yes: the documents support an unqualified affirmative.
+  - Yes: the documents support an unqualified affirmative. If the Answer needs any qualifier, such as a plan, tier, region, add-on, or condition, the Status is Partial, not Yes.
   - Partial: true with a condition, limit or in-progress element. State the condition in the Answer (e.g., SSO available only on certain plans; a certification in progress with its expected date).
   - No: the documents explicitly state the company does not do this. Answer honestly and cite it.
   - Not covered: the documents are silent. The Answer is exactly "Not covered in the trust documents — route to the security owner." Never infer from industry norms, from other answers, or from any other company's documents.
 - Use only the requested company's documents. Never fill an answer with another company's text, even when the topic and wording match.
 - Copy numbers, durations, standards and dates exactly as written, with units (e.g., "35 days", "AES-256", "TLS 1.2 or higher"). Never combine, round or recalculate.
-- Evidence is a short verbatim phrase from the source document, under 15 words, in quotes. If you cannot quote supporting text, the Status is "Not covered".
-- A certification or report that is "in progress" or "expected" is never answered as held. If a buyer asks for a report the company does not yet hold, Status is Partial or No, and the Answer states what the company does hold and what is in progress, with dates.
+- Evidence is a short verbatim phrase from the source document, under 15 words, in quotes. Copy it exactly, character for character. If the supporting sentence is longer than 15 words, quote one unbroken part of it that is 14 words or fewer, such as the clause that holds the date or number. Never delete, reorder, or merge words inside a quote. When the supporting text is in a table or a list, quote one cell or one item, or part of one, and never join cells or items. If you cannot quote supporting text, the Status is "Not covered".
+- A certification or report that is "in progress" or "expected" is never answered as held. If a buyer asks for a report the company does not yet hold, Status is Partial, and the Answer states what the company does hold and what is in progress, with dates.
 - Keep each Answer to 1–3 sentences in a professional, factual tone, written in third person ("Lumera Pay encrypts...").
 - Add no commentary outside the table and the two closing lines.
 

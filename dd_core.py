@@ -32,15 +32,28 @@ def message_text(content):
         return "\n".join(out)
     return str(getattr(content, "text", content))
 
+TRANSIENT = ("503", "502", "504", "429", "timed out", "timeout", "temporarily", "connection", "service unavailable")
+
+def with_retry(fn, *args, tries=6, base_s=3, **kwargs):
+    """Call an API function again after a short wait when SeekrFlow reports a temporary error."""
+    for attempt in range(tries):
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            msg = str(e).lower()
+            if attempt == tries - 1 or not any(t in msg for t in TRANSIENT):
+                raise
+            time.sleep(base_s * (2 ** attempt))
+
 def ask_agent(client, agent_id, prompt, timeout_s=240, poll_s=1.5):
     """One new thread per call, so runs never share context. Returns the reply text and run details."""
     t0 = time.time()
-    thread = client.agents.threads.create()
-    client.agents.threads.create_message(thread_id=thread.id, role="user", content=prompt)
-    run = client.agents.runs.run(agent_id=agent_id, thread_id=thread.id, stream=False)
+    thread = with_retry(client.agents.threads.create)
+    with_retry(client.agents.threads.create_message, thread_id=thread.id, role="user", content=prompt)
+    run = with_retry(client.agents.runs.run, agent_id=agent_id, thread_id=thread.id, stream=False)
     run_id = run.run_id
     while True:
-        status = str(getattr(client.agents.runs.retrieve(run_id, thread_id=thread.id), "status", "")).lower()
+        status = str(getattr(with_retry(client.agents.runs.retrieve, run_id, thread_id=thread.id), "status", "")).lower()
         if status.endswith("completed"):
             break
         if any(s in status for s in ("fail", "cancel", "expire", "error")):
@@ -48,7 +61,7 @@ def ask_agent(client, agent_id, prompt, timeout_s=240, poll_s=1.5):
         if time.time() - t0 > timeout_s:
             raise TimeoutError(f"run {run_id} exceeded {timeout_s}s")
         time.sleep(poll_s)
-    messages = client.agents.threads.list_messages(thread.id)
+    messages = with_retry(client.agents.threads.list_messages, thread.id)
     return {"text": message_text(messages[0].content), "run_id": run_id, "thread_id": thread.id,
             "latency_s": round(time.time() - t0, 2)}
 

@@ -4,7 +4,7 @@ python silver_check.py                          # documents only agent (agent_id
 python silver_check.py agent_ids_facts.json     # agent with the compliance record tool
 Writes out/silver/<name>.xlsx and prints "Silver check: PASS" or "Silver check: FAIL".
 """
-import json, pathlib, sys
+import json, pathlib, sys, time
 import pandas as pd
 from seekrai import SeekrFlow
 import dd_core, verify
@@ -23,7 +23,17 @@ def main(agent_ids_file="agent_ids.json"):
         # One question per run, so each row has its own run ID and source-trace chunks.
         rows = []
         for q, text in zip(questions.qnum, questions.question):
-            res = dd_core.ask_agent(client, ids["agent_id"], dd_core.build_prompt(COMPANY, [(int(q), text)]))
+            res = None
+            for attempt in range(3):
+                try:
+                    res = dd_core.ask_agent(client, ids["agent_id"], dd_core.build_prompt(COMPANY, [(int(q), text)]))
+                    break
+                except Exception as e:
+                    print(f"question {q}: {e!r}, trying again ({attempt + 1} of 3)", flush=True)
+                    time.sleep(10)
+            if res is None:
+                continue
+            print(f"question {q} answered", flush=True)
             for r in dd_core.parse_table(res["text"]):
                 r.update(run_id=res["run_id"], latency_s=res["latency_s"], chunk_ids=",".join(dd_core.chunk_ids(res["text"])))
                 rows.append(r)

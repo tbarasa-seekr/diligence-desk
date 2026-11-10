@@ -21,7 +21,7 @@ def _reply(prompt):
         if k["expected_status"] == "Not covered":
             nh.append(str(q)); rows.append(f"| {q} | q | Not covered in the trust documents \u2014 route to the security owner. | Not covered | \u2014 | \u2014 |")
         else:
-            rows.append(f"| {q} | q | Draft citing {ev}. | {k['expected_status']} | \"{ev}\" | {_SRC[k['source_doc']]} |")
+            rows.append(f"| {q} | q | Draft citing {ev}. | {k['expected_status']} | \"{ev}\" | {_SRC[k['source_doc'].split('|')[0]]} |")
     return ("Lumera Pay, Inc. \u2014 Draft Questionnaire Responses\n| # | Question | Answer | Status | Evidence | Source |\n|---|---|---|---|---|---|\n"
             + "\n".join(rows) + f"\nNEEDS HUMAN: {', '.join(nh) or 'none'}\nDraft responses for human review \u2014 not a compliance determination.\n"
             + "chunk_id: mockchunk001 section: Section 2")

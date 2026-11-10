@@ -198,15 +198,15 @@ The tool is how the agent reaches the store. Its settings decide how many passag
 1. Select **Agent Builder**, then **Tool Library**, then **Create Tool**.
 2. Tool Name: `trust_corpus_search`. Type it exactly. The agent instructions use this name.
 3. Tool Type: **File Search**. Vector Store: `Trust Corpus - Lumera Pay`.
-4. Set **Top K** to `5` and **Score Threshold** to `0.3`.
+4. Set **Top K** to `5` and **Score Threshold** to `0.2`.
 5. Open `agent/tool-instructions.txt`, copy all of it, and paste it into the Tool Instructions box.
 6. Select **Create Tool**.
 
 **Expect:** a Tool Summary with Status "Not Linked". It links when you attach it to an agent.
 
-**Screenshot:** `bronze-02-tool-summary.png`. Shows tool Summary showing File Search, Top K 5, and Score Threshold 0.3.
+**Screenshot:** `bronze-02-tool-summary.png`. Shows the Tool Summary with File Search, Top K 5, and Score Threshold 0.2.
 
-**Complete when:** the tool exists and its Tool Summary shows Top K 5 and Score Threshold 0.3.
+**Complete when:** the tool exists and its Tool Summary shows Top K 5 and Score Threshold 0.2.
 
 ### Step 2.4: Create the agent
 
@@ -263,7 +263,9 @@ Capture these screenshots from the first run of each check:
 
 **Screenshot:** `bronze-08-look-alike-before-upload.png`. Shows reply for Lumera Health before its document is uploaded: no trust documents found.
 
-**Screenshot:** `bronze-09-full-questionnaire.png`. Shows all 18 rows with both closing lines, or the point where the reply stops.
+**Screenshot:** `bronze-09a-full-questionnaire-top.png`. Shows the top half of the full questionnaire reply.
+
+**Screenshot:** `bronze-09b-full-questionnaire-bottom.png`. Shows the bottom half, with the last rows and both closing lines.
 
 If the full questionnaire stalls, capture the point where it stops, run it in batches of five, and note that in `evidence/evidence_log.md`. Part 4 handles full files.
 
@@ -333,7 +335,7 @@ Silver uses its own vector store, so the bronze store keeps its look-alike docum
 python3 create_agent.py --vector-store-id YOUR_STORE_ID
 ```
 
-The script creates a File Search tool on your store and an agent with the same instructions as bronze. It waits until the agent is Active and saves its IDs in `agent_ids.json`.
+The script creates a File Search tool on your store and an agent, using the same tool instructions and agent instructions as bronze. It waits until the agent is Active and saves its IDs in `agent_ids.json`.
 
 **Expect:** `agent created:`, then `saved agent_ids.json`.
 
@@ -543,7 +545,7 @@ A row passes only when its status, evidence, source, and company isolation are a
 ### 10.3 Rules that keep the checks honest
 
 1. Every wrong answer a reviewer finds becomes a new test in the answer key. Tests grow. They do not shrink.
-2. Change an expected answer only when the source document changes, with the document owner's sign-off.
+2. Change an expected answer only when the source document changes, with the document owner's sign-off. If the same fact is stated in several of the company's documents, list every such document in `source_doc`, separated by `|`.
 3. A result counts only with its evidence: the report, the audit log, the model and settings, the date, and who ran it.
 4. The practice run proves the scripts. Only a run against SeekrFlow counts toward a check.
 5. Human approval is part of the system. Track the share of rows reviewers approve without edits. Use 80% as the starting goal until a baseline is agreed.
@@ -576,14 +578,14 @@ Change one thing at a time, then rerun the failed check.
 | Setup fails because a name already exists | Add `--name NEW_NAME --tool-name NEW_TOOL_NAME` to the command. |
 | The agent stays Pending for more than 15 minutes | Check it in Agent Builder. If it is stuck, open a ticket as described in the OneValley Operator SOP. |
 | `run_questionnaire.py` times out | Run the same command again with `--timeout 400 --concurrency 2`. It resumes. |
-| A row says Not covered but the documents have the answer | The right passage was not retrieved. Lower Score Threshold toward 0.2, or add a second search with different keywords to the agent instructions. |
+| A row says Not covered but the documents have the answer | The right passage was not retrieved. Lower Score Threshold below 0.2, or raise Top K to 8. |
 | Another company's values appear | Raise Score Threshold toward 0.5. Rerun the document check. Confirm each section's company line. As a last resort, use one store per company. |
 | Q2 answered Yes, or with the February 2026 date | The agent misjudged the in-progress certification. Confirm the "in progress is never held" rule is in the pasted instructions. Try a different model. |
 | Numbers swap between 35, 30, 365, and 14 days | Confirm Temperature 0.1. The evidence quote must contain the number itself. |
 | Statuses change between runs | Confirm Temperature 0.1 and Top P 0.9. Use Run Source Trace to see whether different passages were retrieved. |
 | The agent ignores the tool or errors on search | The tool name must match exactly, and the tool must be attached to the agent. |
 | Status accuracy fails but the quotes are real | The agent found the right sentence and chose the wrong label. Compare with bronze on the same question, then try another model. |
-| Quotes found in documents fails | The agent reworded its evidence. Check whether bold marks or line breaks split the phrase. Otherwise tighten the evidence rule in the instructions. |
+| Quotes found in documents fails | The agent reworded its evidence. Check whether bold marks or line breaks split the phrase. If the supporting sentence is longer than 15 words, the agent may shorten it, so confirm the instructions tell it to quote one unbroken part. |
 | Any contamination | Stop. Rerun the document check. Confirm one company per store. Rerun the isolation re-test and the standard questionnaire after the fix. |
 | Any overclaim | This blocks release. Do not use or demo the agent until the fix is tested. |
 | A check passes but you see a wrong answer | Add the question and the correct answer to the answer key. |
@@ -603,7 +605,7 @@ Change one thing at a time, then rerun the failed check.
 
 - [ ] Four Lumera Pay files (two PDFs, one Word, one Markdown) uploaded as Raw Data, company lines checked after conversion
 - [ ] Vector store `Trust Corpus - Lumera Pay` Ready, File Count 4
-- [ ] Tool `trust_corpus_search`: File Search, Top K 5, Score Threshold 0.3
+- [ ] Tool `trust_corpus_search`: File Search, Top K 5, Score Threshold 0.2
 - [ ] Agent `Diligence_Desk` Active, Reasoning-Optimized
 - [ ] Playground: Temperature 0.1, Top P 0.9, new thread per run
 - [ ] Round 1: 13 runs pass
@@ -635,14 +637,15 @@ Save each screenshot in the folder shown, using the file name shown.
 | Folder | File name | What it shows |
 | --- | --- | --- |
 | `evidence/bronze/` | `bronze-01-store-ready.png` | Vector store page with File Count 4 and every file Ready. |
-| `evidence/bronze/` | `bronze-02-tool-summary.png` | Tool Summary showing File Search, Top K 5, and Score Threshold 0.3. |
+| `evidence/bronze/` | `bronze-02-tool-summary.png` | Tool Summary showing File Search, Top K 5, and Score Threshold 0.2. |
 | `evidence/bronze/` | `bronze-03-agent-active.png` | Agent page with Status Active, the model, and the attached tool. |
 | `evidence/bronze/` | `bronze-04-certification-partial.png` | Certification trap reply: Status Partial, with Type I issued March 2026 and Type II expected Q1 2027. |
 | `evidence/bronze/` | `bronze-05-five-question-batch.png` | Five rows in order, including Q16 Not covered and the closing line NEEDS HUMAN: 16. |
 | `evidence/bronze/` | `bronze-06-look-alike-numbers.png` | Backups 35 days, security logs 365 days, and deletion 30 days, each with its own source. |
 | `evidence/bronze/` | `bronze-07-unknown-company.png` | Reply that no trust documents exist for the company, with no Lumera Pay data. |
 | `evidence/bronze/` | `bronze-08-look-alike-before-upload.png` | Reply for Lumera Health before its document is uploaded: no trust documents found. |
-| `evidence/bronze/` | `bronze-09-full-questionnaire.png` | All 18 rows with both closing lines, or the point where the reply stops. |
+| `evidence/bronze/` | `bronze-09a-full-questionnaire-top.png` | The top half of the full questionnaire reply. |
+| `evidence/bronze/` | `bronze-09b-full-questionnaire-bottom.png` | The bottom half, with the last rows and both closing lines. |
 | `evidence/bronze/` | `bronze-10-look-alike-answers.png` | Lumera Health answers: Type II issued February 2026, backups 14 days, notification 72 hours. |
 | `evidence/bronze/` | `bronze-11-isolation-retest.png` | Lumera Pay five-question batch after the look-alike upload: Q2 still Partial and no Lumera Health values. |
 | `evidence/bronze/` | `bronze-12-ambiguous-company.png` | Reply asking whether you mean Lumera Pay, Inc. or Lumera Health, Inc. |
